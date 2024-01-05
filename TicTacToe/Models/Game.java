@@ -1,14 +1,18 @@
 package TicTacToe.Models;
 
+import TicTacToe.Enums.CellState;
 import TicTacToe.Enums.GameState;
 import TicTacToe.Enums.playerType;
 import TicTacToe.Exceptions.InvalidBotCountException;
 import TicTacToe.Exceptions.InvalidPlayerCountException;
 import TicTacToe.Exceptions.InvalidSymbolSelectionException;
-import TicTacToe.Strategies.WinningStrategy;
+import TicTacToe.Strategies.WinningStrategy.WinningStrategy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import static java.nio.file.Files.move;
+
 public class Game {
 private Board board ;
 private List<Player> players ;
@@ -95,7 +99,7 @@ private List<WinningStrategy> winningStrategies ;
         public boolean checkValidSymbol(ArrayList<Player> player) throws InvalidSymbolSelectionException{
             HashMap<Character, Integer> symbolMap = new HashMap<>() ;
         for(Player p : players ) {
-                if(!symbolMap.containsKey(p.getSymbol())) {
+                if(!symbolMap.containsKey(p.getSymbol().getSymbol())) {
                     symbolMap.put(p.getSymbol().getSymbol() , p.getId() ) ;
                 }  else {
                     throw new InvalidSymbolSelectionException() ;
@@ -112,7 +116,81 @@ private List<WinningStrategy> winningStrategies ;
         return new Game(this.dimension , this.players , this.winningStrategies) ;
     }
 }
+    public void printBoard() {
+        board.printBoard() ;
+    }
 
+    public boolean validateMove(Move move) {
+        int row = move.getCell().getRow() ;
+        int col = move.getCell().getCol() ;
+        if(row >= board.getSize()) {
+            return false ;
+        }
+        if(col >= board.getSize()) {
+            return false ;
+        }
+        return board.getBoard().get(row).get(col).getCellState().equals(CellState.EMPTY) ;
+    }
+    public void makeMove() {
+        Player currentMovePlayer = players.get(nextPlayerMoveIndex) ;
+        System.out.println("It is "
+                + currentMovePlayer.getName() + "'s turn .Please make move");
+        Move move = currentMovePlayer.makeMove(board) ;
+
+        if(!validateMove(move)) {
+            System.out.println("Invalid Move ! Please try again") ;
+            return ;
+        }
+        int row = move.getCell().getRow() ;
+        int col = move.getCell().getCol() ;
+        Cell cellToBeUpdated = board.getBoard().get(row).get(col) ;
+        cellToBeUpdated.setCellState(CellState.FILLED);
+        cellToBeUpdated.setPlayer(currentMovePlayer);
+
+        Move finalMoveObject = new Move(cellToBeUpdated , currentMovePlayer) ;
+        moves.add(finalMoveObject) ;
+
+        nextPlayerMoveIndex +=1 ;
+        nextPlayerMoveIndex %= players.size() ;
+
+        if(checkWinner(board , finalMoveObject)) {
+            gameState = GameState.SUCCESS ;
+            winner = currentMovePlayer ;
+        } else if(moves.size() == board.getSize() * board.getSize()) {
+            gameState = GameState.DRAW ;
+        }
+        System.out.println("Player " + currentMovePlayer.getName() +
+                " Moved at " + move.getCell().getRow() + " ," + move.getCell().getCol());
+    }
+
+    public boolean checkWinner(Board board , Move move) {
+        for(WinningStrategy winningStrategy : winningStrategies) {
+            if(winningStrategy.checkWinner(move , board)) {
+                return true ;
+            }
+        }
+        return false ;
+    }
+
+    public void undo() {
+       if(moves.size() == 0 ) {
+           System.out.println("No moves made to undo ! Make a move ") ;
+            return ;
+       }
+       Move move = moves.get(moves.size() -1 ) ;
+       moves.remove(move) ;
+       Cell cell = move.getCell() ;
+       cell.setPlayer(null) ;
+       cell.setCellState(CellState.EMPTY);
+
+       nextPlayerMoveIndex -=1 ;
+       nextPlayerMoveIndex = (nextPlayerMoveIndex + players.size()) % players.size() ;
+
+       for(WinningStrategy winningStrategy :winningStrategies) {
+           winningStrategy.handleUndo(board,move);
+
+       }
+    }
     //Getters and Setters for all the private attributes of the class Game
     public Board getBoard() {
         return board;

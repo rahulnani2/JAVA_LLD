@@ -3,6 +3,9 @@ package TicTacToe.Models;
 public class Symbol {
    private Character symbol;
 
+   public Symbol(Character symbol) {
+       this.symbol = symbol ;
+   }
     public Character getSymbol() {
         return symbol;
     }

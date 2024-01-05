@@ -6,7 +6,7 @@ import TicTacToe.Exceptions.InvalidPlayerCountException;
 import TicTacToe.Exceptions.InvalidSymbolSelectionException;
 import TicTacToe.Models.Game;
 import TicTacToe.Models.Player;
-import TicTacToe.Strategies.WinningStrategy;
+import TicTacToe.Strategies.WinningStrategy.WinningStrategy;
 
 import java.util.List ;
 public class GameController {
@@ -14,27 +14,27 @@ public class GameController {
                           List<WinningStrategy> winningStrategies) throws
             InvalidBotCountException , InvalidPlayerCountException , InvalidSymbolSelectionException {
     //Validate the parameters
-      return Game.getBuilder()
+      return Game.getBuilder() //-- New builder
               .setDimension(dimension)
               .setPlayers(players)
               .setWinningStrategies(winningStrategies)
               .build();
     }
     public void displayBoard(Game game) {
-
+            game.printBoard();
     }
     public void MakeMove(Game game ) {
-
+        game.makeMove();
     }
     public GameState checkState(Game game) {
-        return null ;
+        return game.getGameState() ;
     }
     public Player getWinner(Game game) {
-        return null ;
+        return game.getWinner() ;
     }
 
-    public void undo() {
-
+    public void undo(Game game) {
+        game.undo() ;
     }
 }
 

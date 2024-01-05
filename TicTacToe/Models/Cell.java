@@ -6,7 +6,21 @@ public class Cell {
    private int row;
    private int col ;
    private Player player ;
+   private CellState cellState ;
 
+   public Cell(int x , int  y) {
+       this.row = x ;
+       this.col = y ;
+       this.player = null ;
+       this.cellState = CellState.EMPTY ;
+   }
+   public void display() {
+       if(player == null) {
+           System.out.print("| - |");
+       } else {
+           System.out.printf("| " + player.getSymbol().getSymbol() + " |");
+       }
+        }
     public int getRow() {
         return row;
     }
@@ -39,5 +53,4 @@ public class Cell {
         this.cellState = cellState;
     }
 
-    private CellState cellState ;
 }

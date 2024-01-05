@@ -1,6 +1,6 @@
 package TicTacToe.Enums;
 
-public enum BotDiffciultyLevel {
+public enum BotDifficultyLevel {
     EASY,
     MEDIUM,
     HARD
